@@ -103,6 +103,7 @@ void loop() {
         break;
       case 'c':
         result.hide();
+        op.set(operation::Method::None);
         op.hide();
         input.setValue(0);
         break;
