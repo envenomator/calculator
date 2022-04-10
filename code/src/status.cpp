@@ -2,14 +2,9 @@
 #include "displayvalue.h"
 #include <string.h>
 
-status::status(Adafruit_ST7789 *tft)
+status::status(displayValue::Base base, uint8_t bitlength, bool sign)
 {
-    this->_tft = tft;
-}
-
-void status::setArea(area newarea)
-{
-    _tftarea = newarea;
+    set(base,bitlength,sign);
 }
 
 void status::set(displayValue::Base base, uint8_t bitlength, bool sign)
@@ -17,39 +12,34 @@ void status::set(displayValue::Base base, uint8_t bitlength, bool sign)
     _base = base;
     _bitlength = bitlength;
     _sign = sign;
-    display();
+    if(_show) _display();
 }
 
 void status::set(displayValue::Base base)
 {
     _base = base;
-    display();
+    if(_show) _display();
 }
 
 void status::set(uint8_t bitlength)
 {
     _bitlength = bitlength;
-    display();
+    if(_show) _display();
 }
 
 void status::set(bool sign)
 {
     _sign = sign;
-    display();
+    if(_show) _display();
 }
 
-void status::display()
+void status::_display()
 {
     char message[STATUSSTRINGMAXLENGTH];
     char temp[5];
 
     // clear first
-    _tft->fillRect(_tftarea.getTopLeft().getx(),
-                   _tftarea.getTopLeft().gety(),
-                   _tftarea.width(),
-                   _tftarea.height(),
-                   ST77XX_BLACK);
-
+    _clear();
     // create message
     // Base type
     switch(_base)
@@ -86,5 +76,4 @@ void status::display()
     _tft->setTextColor(ST77XX_GREEN,ST77XX_BLACK);
     _tft->setCursor(_tftarea.getTopLeft().getx(), _tftarea.getTopLeft().gety());
     _tft->print(message);
-
 }

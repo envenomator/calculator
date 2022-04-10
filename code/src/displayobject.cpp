@@ -22,6 +22,11 @@ void displayObject::_clear()
                    _bgcolor);
 }
 
+void displayObject::_display()
+{
+
+}
+
 void displayObject::show()
 {
     _show = true;

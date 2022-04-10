@@ -56,5 +56,5 @@ void inputBox::processKeyValue(unsigned char key)
     }
 
     // display
-    display();
+    if(_show) _display();
 }

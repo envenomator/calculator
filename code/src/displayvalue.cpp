@@ -3,14 +3,12 @@
 #include <inttypes.h>
 
 // Constructor
-displayValue::displayValue(uint32_t value, Base base, uint8_t bitlength, Adafruit_ST7789 *screen)
+displayValue::displayValue(uint32_t value, Base base, uint8_t bitlength)
 {
     _currentValue = value;
     _currentBase = base;
     _setBitLength(bitlength);
     _currentLength = 0;
-    _tft = screen;
-    _display = false;
     strcpy(_displaystring,"0");
     if(_currentBase == displayValue::Dec) strcpy(_displaystring, "0");
     if(_currentBase == displayValue::Hex) strcpy(_displaystring, "0x0");
@@ -54,28 +52,19 @@ void displayValue::set(uint32_t value)
         default:
             break;
     }
-    if(_display)
+    if(_show)
     {
         // clear screen
         _clear();
         // update current value
-        display();
+        _display();
     }
-}
-
-void displayValue::_clear()
-{
-    _tft->fillRect(_tftarea.getTopLeft().getx(),
-                   _tftarea.getTopLeft().gety(),
-                   _tftarea.width(),
-                   _tftarea.height(),
-                   ST77XX_BLACK);
 }
 
 void displayValue::setBitLength(uint8_t bitlength)
 {
     _setBitLength(bitlength);
-    if(_display) display();
+    if(_show) _display();
 }
 
 void displayValue::_setBitLength(uint8_t bitlength)
@@ -115,30 +104,16 @@ void displayValue::setBase(Base newbase)
     _setBitLength(_currentBitLength);
     set(_currentValue);
 
-    if(_display) display();
+    if(_show) _display();
 }
 
-void displayValue::setArea(area newarea)
-{
-    this->_tftarea = newarea;
-}
-
-void displayValue::hide()
-{
-    _display = false;
-
-    _clear();
-}
-
-void displayValue::display()
+void displayValue::_display()
 {
     _tft->setTextSize(3);
     _tft->setTextColor(ST77XX_BLUE,ST77XX_BLACK);
     _tft->setCursor(_tftarea.getBottomRight().getx() - (strlen(_displaystring) * 18 - 1),
                     _tftarea.getTopLeft().gety());
     _tft->print(_displaystring);
-
-    _display = true;
 }
 
 void displayValue::display32bit()

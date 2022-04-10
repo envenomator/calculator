@@ -42,11 +42,11 @@ byte colPins[COLS] = {14,15,16,17,18,19};
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
 // value setup
-displayValue result(0,displayValue::Hex, 16, &tft);  // default Decimal mode, start from 0, nothing to show
-inputBox input(0,displayValue::Hex,16,&tft);          // default Decimal mode, start from 0, show value
+displayValue result(0,displayValue::Hex, 16);  // default Decimal mode, start from 0, nothing to show
+inputBox input(0,displayValue::Hex,16);          // default Decimal mode, start from 0, show value
 
 // status box
-status currentstatus(&tft);
+status currentstatus(displayValue::Hex, 16, false);
 
 void wakeUpNow()
 {
@@ -62,22 +62,26 @@ void sleepNow()
 }
 
 void setup(void) {
+  // Screen init
   tft.init(240, 320);           // Init ST7789 320x240
   tft.setRotation(1);
   tft.fillScreen(ST77XX_BLACK);
 
+  // attach screen object and asign area to each output object
+  input.init(&tft, area(0,100,319,129));
+  result.init(&tft, area(0,0,319,23));
+  currentstatus.init(&tft, area(0,224,319,239));
+
+  // set backlight pin to on
   DDRB |= (1 << 6);
   PORTB |= (1 << 6); // set bit 6 on for backlight (BL)
 
+  // PWR button is an input
   pinMode(2, INPUT);  // PWR button connected to PIN 2
 
-  result.setArea(area(0,0,319,23));
-  input.setArea(area(0,100,319,129));
-  currentstatus.setArea(area(0,224,319,239));
-
-  currentstatus.set(displayValue::Hex, 16, false);
-  input.display();
-
+  // show default objects on screen
+  input.show();
+  currentstatus.show();
 }
 
 void loop() {
@@ -94,7 +98,6 @@ void loop() {
       case 'c':
         result.hide();
         input.set(0);
-        //currentstatus.display();
         break;
       case 'h':
         currentstatus.set(displayValue::Hex);
@@ -114,7 +117,7 @@ void loop() {
       
       case '=':
         result.set(input.get());
-        result.display();
+        result.show();
       default:
         break;
     }
