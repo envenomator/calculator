@@ -144,7 +144,10 @@ void loop() {
       case '^': // change sign
         break;
       case '!': // Bitwise NOT
-        result.setValue(~(input.getValue()));
+        if(result.getValue() != 0 && input.getValue() == 0)
+          result.setValue(~(result.getValue()));
+        else
+          result.setValue(~(input.getValue()));
         result.show();
         op.hide();
         op.set(operation::None);
