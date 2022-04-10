@@ -29,8 +29,9 @@ class operation: public displayObject
 
         operation();
         void set(Method currentmethod);
-        bool active();
-
+        uint32_t perform(uint32_t opA, uint32_t opB);
+        bool inProgress();
+        
     protected:
         bool _active;
         Method _currentmethod;

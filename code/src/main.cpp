@@ -142,15 +142,29 @@ void loop() {
         break;
       case '^': // change sign
         break;
-
-      case '=':
-        result.setValue(input.getValue());
+      case '!': // Bitwise NOT
+        result.setValue(~(input.getValue()));
         result.show();
         op.hide();
         op.set(operation::None);
-
-      default: // Operators
-        if(!op.active())  // only one operator at a time
+        input.setValue(0);
+        break;
+      case '=':
+        if(op.inProgress())
+        {
+          result.setValue(op.perform(result.getValue(),input.getValue()));
+        }
+        else
+        {
+          result.setValue(input.getValue());
+        }
+        result.show();
+        op.hide();
+        op.set(operation::None);
+        input.setValue(0);
+        break;
+      default: // Operators with two operands
+        if(!op.inProgress())  // only one operator at a time
         {
           result.setValue(input.getValue());
           result.show();
@@ -164,9 +178,6 @@ void loop() {
               break;
             case 'x': // XOR
               op.set(operation::Xor);
-              break;
-            case '!': // NOT
-              op.set(operation::Not);
               break;
             case 'l': // LSHIFT
               op.set(operation::SL);
