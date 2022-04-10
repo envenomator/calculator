@@ -62,6 +62,7 @@ void inputBox::processKeyValue(unsigned char key)
         {
             if(key != '0') // don't process extra zeroes when 0 on screen
             {
+                // Just replace the on-screen '0' at the right position
                 if(_base == Dec) _displaystring[0] = key;
                 if(_base == Hex) _displaystring[2] = key;
                 if(_base == Bin) _displaystring[2] = key;
@@ -74,7 +75,7 @@ void inputBox::processKeyValue(unsigned char key)
             _currentLength++;
         }
 
-        if(_currentLength)
+        if(_currentLength) // zero could be pressed with '0' on screen, so no processing then
         {
             // update value
             switch(_base)
