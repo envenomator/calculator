@@ -101,7 +101,8 @@ void loop() {
       case 'X':
         input.deleteDigit();
         break;
-      case 'c':
+      case 'c': // Clear
+        result.setValue(0); // no results
         result.hide();
         op.set(operation::Method::None);
         op.hide();
@@ -166,7 +167,11 @@ void loop() {
       default: // Operators with two operands
         if(!op.inProgress())  // only one operator at a time
         {
-          result.setValue(input.getValue());
+          // Select previous result, or current input
+          if(input.getValue() != 0)
+            result.setValue(input.getValue());
+          else
+            result.setValue(result.getValue());
           result.show();
           switch(key)
           {
