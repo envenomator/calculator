@@ -18,6 +18,7 @@
 #include "inputbox.h"
 #include "area.h"
 #include "statusmessage.h"
+#include "operation.h"
 
 // TFT Screen setup
 #define TFT_CS        10
@@ -29,24 +30,25 @@ Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
 const byte ROWS = 7;
 const byte COLS = 6;
 char keys[ROWS][COLS] = {   //CAPS and numbers are direct input, lower-case are commands
-  {'h','u','s','h','i','j'},
-  {'b','A','l','r','c','d'},
+  {'h','u','s','i','j','k'},
+  {'b','A','l','r','c','X'},
   {'d','B','m','n','%','/'},
   {'a','C','7','8','9','*'},
   {'o','D','4','5','6','-'},
   {'x','E','1','2','3','+'},
-  {'n','F','-','0','p','='} // p isn't mapped to the grid
+  {'!','F','^','0','p','='} // p isn't mapped to the grid
 };
 byte rowPins[ROWS] = {0,1,3,4,5,6,9};
 byte colPins[COLS] = {14,15,16,17,18,19};
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
 // value setup
-displayValue result(0,displayValue::Hex, 16, false);  // default Decimal mode, start from 0, nothing to show
-inputBox input(0,displayValue::Hex,16, false);          // default Decimal mode, start from 0, show value
+displayValue result(0,status::Hex, 16, false);  // default Decimal mode, start from 0, nothing to show
+inputBox input(0,status::Hex,16, false);          // default Decimal mode, start from 0, show value
 
 // status box
-statusMessage currentstatus(0, displayValue::Hex, 16, false);
+statusMessage currentstatus(0, status::Hex, 16, false);
+operation op;
 
 void wakeUpNow()
 {
@@ -68,9 +70,10 @@ void setup(void) {
   tft.fillScreen(ST77XX_BLACK);
 
   // attach screen object and asign area to each output object
-  input.init(&tft, area(0,100,319,129));
-  result.init(&tft, area(0,0,319,23));
-  currentstatus.init(&tft, area(0,224,319,239));
+  result.init(&tft, area(0,0,319,23), ST77XX_WHITE);
+  op.init(&tft, area(0,75,319,99), ST77XX_BLUE);
+  input.init(&tft, area(0,100,319,129), ST77XX_BLUE);
+  currentstatus.init(&tft, area(0,224,319,239), ST77XX_GREEN);
 
   // set backlight pin to on
   DDRB |= (1 << 6);
@@ -95,30 +98,105 @@ void loop() {
       case 'A' ... 'F':
         input.processKeyValue(key);
         break;
+      case 'X':
+        input.deleteDigit();
+        break;
       case 'c':
         result.hide();
+        op.hide();
         input.setValue(0);
         break;
       case 'h':
-        currentstatus.setBase(displayValue::Hex);
-        input.setBase(displayValue::Hex);
-        result.setBase(displayValue::Hex);
+        currentstatus.setBase(status::Hex);
+        input.setBase(status::Hex);
+        result.setBase(status::Hex);
         break;
       case 'b':
-        currentstatus.setBase(displayValue::Bin);
-        input.setBase(displayValue::Bin);
-        result.setBase(displayValue::Bin);
+        currentstatus.setBase(status::Bin);
+        input.setBase(status::Bin);
+        result.setBase(status::Bin);
         break;
       case 'd':
-        currentstatus.setBase(displayValue::Dec);
-        input.setBase(displayValue::Dec);
-        result.setBase(displayValue::Dec);
+        currentstatus.setBase(status::Dec);
+        input.setBase(status::Dec);
+        result.setBase(status::Dec);
         break;
-      
+      case 'i': // 8-bit mode
+        currentstatus.setBitLength(8);
+        input.setBitLength(8);
+        result.hide();
+        result.setBitLength(8);
+        break;
+      case 'j': // 16-bit mode
+        currentstatus.setBitLength(16);
+        input.setBitLength(16);
+        result.hide();
+        result.setBitLength(16);
+        break;
+      case 'k': // 32-bit mode 
+        currentstatus.setBitLength(32);
+        input.setBitLength(32);
+        result.hide();
+        result.setBitLength(32);
+        break;
+      case '^': // change sign
+        break;
+
       case '=':
         result.setValue(input.getValue());
         result.show();
-      default:
+        op.hide();
+        op.set(operation::None);
+
+      default: // Operators
+        if(!op.active())  // only one operator at a time
+        {
+          result.setValue(input.getValue());
+          result.show();
+          switch(key)
+          {
+            case 'a': // AND
+              op.set(operation::And);
+              break;
+            case 'o': // OR
+              op.set(operation::Or);
+              break;
+            case 'x': // XOR
+              op.set(operation::Xor);
+              break;
+            case '!': // NOT
+              op.set(operation::Not);
+              break;
+            case 'l': // LSHIFT
+              op.set(operation::SL);
+              break;
+            case 'r': // RSHIFT
+              op.set(operation::SR);
+              break;
+            case 'm': // Rotate Left
+              op.set(operation::RL);
+              break;
+            case 'n': // Rotate Right
+              op.set(operation::RR);
+              break;
+            case '%': // Modulo
+              op.set(operation::Modulo);
+              break;
+            case '/': // Divide
+              op.set(operation::Divide);
+              break;
+            case '*':
+              op.set(operation::Multiply);
+              break;
+            case '-':
+              op.set(operation::Minus);
+              break;
+            case '+':
+              op.set(operation::Plus);
+          }
+          op.show();
+          input.setValue(0);
+        }
         break;
     }
   }

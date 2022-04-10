@@ -60,7 +60,7 @@ void statusMessage::_display()
     }
     // Display message
     _tft->setTextSize(2);
-    _tft->setTextColor(ST77XX_GREEN,ST77XX_BLACK);
+    _tft->setTextColor(_fgcolor,_bgcolor);
     _tft->setCursor(_tftarea.getTopLeft().getx(), _tftarea.getTopLeft().gety());
     _tft->print(message);
 }

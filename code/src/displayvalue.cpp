@@ -4,9 +4,20 @@
 
 void displayValue::setValue(uint32_t value)
 {
-    char temp[DISPLAYSTRINGMAX];
-
     status::setValue(value);
+    _valueToString();
+    if(_show)
+    {
+        // clear screen
+        _clear();
+        // update current value
+        _display();
+    }
+}
+
+void displayValue::_valueToString()
+{
+    char temp[DISPLAYSTRINGMAX];
     // prepare display string
     switch(_base)
     {
@@ -18,8 +29,7 @@ void displayValue::setValue(uint32_t value)
             if(_currentLength == 1 && temp[0] == '0') _currentLength = 0;
             break;
         case Hex:
-            itoa(_value, temp, 16);
-            strupr(temp);
+            snprintf(temp, DISPLAYSTRINGMAX, "%" PRIX32 "", _value);
             strcpy(_displaystring, "0x");
             strcat(_displaystring, temp);
             _currentLength = strlen(temp);
@@ -34,20 +44,19 @@ void displayValue::setValue(uint32_t value)
         default:
             break;
     }
-    if(_show)
-    {
-        // clear screen
-        _clear();
-        // update current value
-        _display();
-    }
+
 }
 
 void displayValue::setBitLength(uint8_t bitlength)
 {
     status::setBitLength(bitlength);
     _setDigitLimits();
-    if(_show) _display();
+    _valueToString();
+    if(_show) 
+    {
+        _clear();
+        _display();
+    }
 }
 
 void displayValue::_setDigitLimits()
@@ -83,16 +92,19 @@ void displayValue::_setDigitLimits()
 void displayValue::setBase(status::Base base)
 {
     status::setBase(base);
-    setBitLength(_bitlength);
-    setValue(_value);
-
-    if(_show) _display();
+    _setDigitLimits();
+    _valueToString();
+    if(_show)
+    {
+        _clear();
+        _display();
+    }
 }
 
 void displayValue::_display()
 {
     _tft->setTextSize(3);
-    _tft->setTextColor(ST77XX_BLUE,_bgcolor);
+    _tft->setTextColor(_fgcolor,_bgcolor);
     _tft->setCursor(_tftarea.getBottomRight().getx() - (strlen(_displaystring) * 18 - 1),
                     _tftarea.getTopLeft().gety());
     _tft->print(_displaystring);
@@ -106,11 +118,11 @@ void displayValue::display32bit()
   
   _tft->setCursor(0,10);
   _tft->setTextSize(1);
-  _tft->setTextColor(ST77XX_WHITE);
+  _tft->setTextColor(_fgcolor);
   _tft->print("MSW");
   _tft->setCursor(0,40);
   _tft->setTextSize(1);
-  _tft->setTextColor(ST77XX_BLUE);
+  _tft->setTextColor(_fgcolor);
   _tft->print("LSW");
 
   _tft->setTextSize(3);

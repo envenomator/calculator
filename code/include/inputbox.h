@@ -9,6 +9,10 @@ class inputBox: public displayValue
     public:
         inputBox(uint32_t value, Base base, uint8_t bitlength, bool sign): displayValue(value, base, bitlength, sign) {}
         void processKeyValue(unsigned char val);
+        void deleteDigit();
+
+    private:
+        void _flashWarning();
 };
 
 #endif

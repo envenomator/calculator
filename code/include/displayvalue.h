@@ -30,6 +30,7 @@ class displayValue: public displayObject, public status
 
         void _setDigitLimits();     // sets the limit on the amount of digits, based on the base
         void _display();
+        void _valueToString();
         void _setBitLength(uint8_t bitlength);
         void display32bit();
 

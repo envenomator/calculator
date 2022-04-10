@@ -1,17 +1,53 @@
 #include "inputbox.h"
 
+void inputBox::deleteDigit()
+{
+    if(_currentLength)
+    {
+        _displaystring[strlen(_displaystring)-1] = 0;   // delete last input character
+        //update value
+        switch(_base)
+        {
+            case Dec:
+                _value = _value / 10;
+                break;
+            case Hex:
+                _value = _value >> 4;
+                break;
+            case Bin:
+                _value = _value >> 1;
+                break;
+        }
+        _currentLength--;
+        if(_currentLength == 0) strcat(_displaystring, "0");
+        _clear();
+        _display();
+    }
+}
+
 void inputBox::processKeyValue(unsigned char key)
 {
     unsigned char val = key;
+    uint64_t max;
 
     // filter apropriate key for this base
     switch(_base)
     {
         case Bin:
-            if(key > '1') return;
+            if(key > '1') 
+            {
+                _flashWarning();
+                _display();
+                return;
+            }
             break;
         case Dec:
-            if(key > '9') return;
+            if(key > '9')
+            {
+                _flashWarning();
+                _display();
+                return;
+            } 
             break;
         case Hex:
             break;
@@ -24,37 +60,77 @@ void inputBox::processKeyValue(unsigned char key)
     {
         if(_currentLength == 0)
         {
-            if(_base == displayValue::Dec) _displaystring[0] = key;
-            if(_base == displayValue::Hex) _displaystring[2] = key;
-            if(_base == displayValue::Bin) _displaystring[2] = key;
+            if(key != '0') // don't process extra zeroes when 0 on screen
+            {
+                if(_base == Dec) _displaystring[0] = key;
+                if(_base == Hex) _displaystring[2] = key;
+                if(_base == Bin) _displaystring[2] = key;
+                _currentLength++;
+            }
         }
         else
         {
             strncat(_displaystring, (const char *)&val, 1);
+            _currentLength++;
         }
-        _currentLength++;
 
-        // update value
-        switch(_base)
+        if(_currentLength)
         {
-            case Bin:
-                _value = (_value << 1) + (key - '0');
-                break;
-            case Hex:
-                _value = _value << 4;
-                if(key > '9')
-                    _value += 10 + key - 'A';
-                else
-                    _value += key - '0';
-                break;
-            case Dec:
-                _value = (_value * 10) + (key - '0');
-                break;
-            default:
-                break;
+            // update value
+            switch(_base)
+            {
+                case Bin:
+                    _value = (_value << 1) + (key - '0');
+                    break;
+                case Hex:
+                    _value = _value << 4;
+                    if(key > '9')
+                        _value += 10 + key - 'A';
+                    else
+                        _value += key - '0';
+                    break;
+                case Dec:
+                    _value = (_value * 10) + (key - '0');
+                    // check if we overshoot maximum values
+                    switch(_bitlength)
+                    {
+                        case 8:
+                            max = 0xFF;
+                            break;
+                        case 16:
+                            max = 0xFFFF;
+                            break;
+                        case 32:
+                            max = 0xFFFFFFFF;
+                            break;
+                    }
+                    if(_value > max)
+                    {
+                        _value = _value / 10;   // clear out last digit entered
+                        _valueToString();
+                        _flashWarning();
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
     }
+    else _flashWarning();
 
     // display
     if(_show) _display();
+}
+
+void inputBox::_flashWarning()
+{
+    uint16_t tempcolor;
+
+    // Briefly flash RED text, before returning to normal color
+    tempcolor = _fgcolor;
+    _fgcolor = ST77XX_RED;
+    _clear();
+    _display();
+    _fgcolor = tempcolor;
+    _clear();
 }
