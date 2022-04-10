@@ -1,0 +1,33 @@
+EESchema-LIBRARY Version 2.3
+#encoding utf-8
+#(c) SnapEDA 2016 (snapeda.com)
+#This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA) with Design Exception 1.0
+#
+# 47642-0001
+#
+DEF 47642-0001 J 0 40 Y Y 1 L N
+F0 "J" -200 450 50 H V L BNN
+F1 "47642-0001" -200 -500 50 H V L BNN
+F2 "MOLEX_47642-0001" 0 0 50 H I L BNN
+F3 "" 0 0 50 H I L BNN
+F4 "47642-0001" 0 0 50 H I L BNN "MP"
+F5 "Molex" 0 0 50 H I L BNN "MF"
+F6 "Unavailable" 0 0 50 H I L BNN "AVAILABILITY"
+F7 "None" 0 0 50 H I L BNN "PRICE"
+F8 "USB - micro B Receptacle Connector 5 Position Board Edge, Cutout; Surface Mount, Right Angle" 0 0 50 H I L BNN "DESCRIPTION"
+F9 "None" 0 0 50 H I L BNN "PACKAGE"
+DRAW
+S -200 -400 200 400 0 0 10 f
+X VBUS 1 -400 300 200 R 40 40 0 0 W 
+X D- 2 -400 200 200 R 40 40 0 0 B 
+X D+ 3 -400 100 200 R 40 40 0 0 B 
+X GND 5 -400 -100 200 R 40 40 0 0 W 
+X SHIELD S1 -400 -300 200 R 40 40 0 0 W 
+X SHIELD S2 -400 -300 200 R 40 40 0 0 W 
+X SHIELD S3 -400 -300 200 R 40 40 0 0 W 
+X SHIELD S4 -400 -300 200 R 40 40 0 0 W 
+X ID 4 -400 0 200 R 40 40 0 0 B 
+ENDDRAW
+ENDDEF
+#
+# End Library

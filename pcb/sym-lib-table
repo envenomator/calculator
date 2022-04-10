@@ -1,0 +1,5 @@
+(sym_lib_table
+  (lib (name "LCD-20X4B")(type "Legacy")(uri "${KIPRJMOD}/LCD-20X4B/LCD-20X4B.lib")(options "")(descr ""))
+  (lib (name "Venom")(type "KiCad")(uri "${KIPRJMOD}/other/Venom.kicad_sym")(options "")(descr ""))
+  (lib (name "47642-0001")(type "Legacy")(uri "${KIPRJMOD}/47642-0001/47642-0001.lib")(options "")(descr ""))
+)

@@ -1,0 +1,7 @@
+(fp_lib_table
+  (lib (name "LCD-20X4B")(type "KiCad")(uri "${KIPRJMOD}/LCD-20X4B")(options "")(descr ""))
+  (lib (name "PCF8574T")(type "KiCad")(uri "${KIPRJMOD}/PCF8574T")(options "")(descr ""))
+  (lib (name "other")(type "KiCad")(uri "${KIPRJMOD}/other")(options "")(descr ""))
+  (lib (name "Venom")(type "KiCad")(uri "${KIPRJMOD}/other/Venom.pretty")(options "")(descr ""))
+  (lib (name "47642-0001")(type "KiCad")(uri "${KIPRJMOD}/47642-0001")(options "")(descr ""))
+)
