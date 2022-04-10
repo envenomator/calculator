@@ -17,6 +17,7 @@ class status
         void setValue(uint32_t value);
         void setBase(Base base);
         void setBitLength(uint8_t bitlength);
+        uint8_t getBitLength();
         void setSign(bool sign);
 
     protected:
@@ -24,6 +25,8 @@ class status
         Base _base;
         uint8_t _bitlength;
         bool _sign;
+
+        void _clipToBitLength();    // clip uint32_t to chosen bitlength mask
 };
 
 #endif

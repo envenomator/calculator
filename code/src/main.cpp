@@ -126,20 +126,30 @@ void loop() {
       case 'i': // 8-bit mode
         currentstatus.setBitLength(8);
         input.setBitLength(8);
-        result.hide();
+        //result.hide();
         result.setBitLength(8);
         break;
       case 'j': // 16-bit mode
         currentstatus.setBitLength(16);
         input.setBitLength(16);
-        result.hide();
+        //result.hide();
         result.setBitLength(16);
         break;
       case 'k': // 32-bit mode 
         currentstatus.setBitLength(32);
         input.setBitLength(32);
-        result.hide();
+        //result.hide();
         result.setBitLength(32);
+        break;
+      case 's': // change to 2s complement
+        input.setSign(true);
+        result.setSign(true);
+        currentstatus.setSign(true);
+        break;
+      case 'u': // change to unsigned
+        input.setSign(false);
+        result.setSign(false);
+        currentstatus.setSign(false);
         break;
       case '^': // change sign
         break;
@@ -156,7 +166,7 @@ void loop() {
       case '=':
         if(op.inProgress())
         {
-          result.setValue(op.perform(result.getValue(),input.getValue()));
+          result.setValue(op.perform(result.getValue(),input.getValue(),input.getBitLength()));
         }
         else
         {

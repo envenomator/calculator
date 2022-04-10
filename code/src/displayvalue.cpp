@@ -36,7 +36,25 @@ void displayValue::_valueToString()
             if(_currentLength == 1 && temp[0] == '0') _currentLength = 0;
             break;
         case Dec:
-            snprintf(temp, DISPLAYSTRINGMAX, "%" PRIu32 "", _value);
+            if(_sign)
+            {
+                // Create signed strings per bitlength type
+                switch(_bitlength)
+                {
+                    case 8:
+                        snprintf(temp, DISPLAYSTRINGMAX, "%" PRIi8 "", (uint8_t)_value);
+                        break;
+                    case 16:
+                        snprintf(temp, DISPLAYSTRINGMAX, "%" PRId16 "", (uint16_t)_value);
+                        break;
+                    case 32:
+                        snprintf(temp, DISPLAYSTRINGMAX, "%",PRId32 "", _value);
+                        break;
+                }
+            } 
+            else
+                // Unsigned - just create the string at maximum 32bit length
+                snprintf(temp, DISPLAYSTRINGMAX, "%" PRIu32 "", _value);
             strcpy(_displaystring, temp);
             _currentLength = strlen(temp);
             if(_currentLength == 1 && temp[0] == '0') _currentLength = 0;
@@ -97,6 +115,17 @@ void displayValue::setBase(status::Base base)
     if(_show)
     {
         _clear();
+        _display();
+    }
+}
+
+void displayValue::setSign(bool sign)
+{
+    status::setSign(sign);
+    if(_base == status::Dec && _show) // only change display if current base is Decimal
+    {
+        _clear();
+        _valueToString();
         _display();
     }
 }

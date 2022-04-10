@@ -29,7 +29,7 @@ class operation: public displayObject
 
         operation();
         void set(Method currentmethod);
-        uint32_t perform(uint32_t opA, uint32_t opB);
+        uint32_t perform(uint32_t opA, uint32_t opB, uint8_t bitlength);
         bool inProgress();
         
     protected:

@@ -16,16 +16,11 @@ uint32_t status::getValue()
 void status::setValue(uint32_t value)
 {
     _value = value;
+    _clipToBitLength();
 }
 
-void status::setBase(status::Base base)
+void status::_clipToBitLength()
 {
-    _base = base;
-}
-
-void status::setBitLength(uint8_t bitlength)
-{
-    _bitlength = bitlength;
     switch(_bitlength)
     {
         case 8:
@@ -38,6 +33,22 @@ void status::setBitLength(uint8_t bitlength)
             _value = _value & 0xFFFFFFFF;
             break;
     }
+}
+
+void status::setBase(status::Base base)
+{
+    _base = base;
+}
+
+void status::setBitLength(uint8_t bitlength)
+{
+    _bitlength = bitlength;
+    _clipToBitLength();
+}
+
+uint8_t status::getBitLength()
+{
+    return _bitlength;
 }
 
 void status::setSign(bool sign)

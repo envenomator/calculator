@@ -9,13 +9,13 @@ char methodNames[][MAXMETHODNAMELENGTH]=
     "OR",
     "XOR",
     "NOT",
-    "Shift LEFT",
-    "Shift RIGHT",
-    "Rotate LEFT",
-    "Rotate RIGHT",
+    "<< shift bit(s)",
+    "shift bit(s) >>",
+    "<< rotate bit(s) <",
+    "> rotate bit(s) >>",
     "%",
     "/",
-    "*",
+    "X",
     "-",
     "+" 
 };
@@ -32,7 +32,7 @@ bool operation::inProgress()
     return _active;
 }
 
-uint32_t operation::perform(uint32_t opA, uint32_t opB)
+uint32_t operation::perform(uint32_t opA, uint32_t opB, uint8_t bitlength)
 {
     uint32_t result = 0;
 
@@ -59,14 +59,19 @@ uint32_t operation::perform(uint32_t opA, uint32_t opB)
             result = opA >> opB;
             break;
         case Method::RL:
+            result = (opA << opB) | (opA >> (bitlength - opB));
             break;
         case Method::RR:
+            result = (opA >> opB) | (opA << (bitlength - opB));
             break;
         case Method::Modulo:
             result = opA % opB;
             break;
         case Method::Divide:
-            result = opA / opB;
+            if(opB == 0)
+                result = 0; // avoid divide by 0
+            else
+                result = opA / opB;
             break;
         case Method::Multiply:
             result = opA * opB;
