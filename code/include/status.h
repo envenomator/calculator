@@ -1,28 +1,29 @@
 #ifndef STATUS_H
 #define STATUS_H
-#include "area.h"
-#include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
-#include "displayvalue.h"
-#include "displayobject.h"
+#include <stdint.h>
 
-#define STATUSSTRINGMAXLENGTH 32+1
-
-class status: public displayObject
+class status
 {
     public:
-        status(displayValue::Base base, uint8_t bitlength, bool sign);
-        void set(displayValue::Base base, uint8_t bitlength, bool sign);
-        void set(displayValue::Base base);
-        void set(uint8_t bitlength);
-        void set(bool sign);
+       enum Base
+        {
+            Dec,
+            Hex,
+            Bin
+        };
 
-    private:
-        displayValue::Base _base;
+        status(uint32_t value, Base base, uint8_t bitlength, bool sign);
+        uint32_t getValue();
+        void setValue(uint32_t value);
+        void setBase(Base base);
+        void setBitLength(uint8_t bitlength);
+        void setSign(bool sign);
+
+    protected:
+        uint32_t _value;
+        Base _base;
         uint8_t _bitlength;
         bool _sign;
-        
-        void _display();
-
 };
 
 #endif

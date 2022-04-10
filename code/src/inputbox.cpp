@@ -5,7 +5,7 @@ void inputBox::processKeyValue(unsigned char key)
     unsigned char val = key;
 
     // filter apropriate key for this base
-    switch(_currentBase)
+    switch(_base)
     {
         case Bin:
             if(key > '1') return;
@@ -24,9 +24,9 @@ void inputBox::processKeyValue(unsigned char key)
     {
         if(_currentLength == 0)
         {
-            if(_currentBase == displayValue::Dec) _displaystring[0] = key;
-            if(_currentBase == displayValue::Hex) _displaystring[2] = key;
-            if(_currentBase == displayValue::Bin) _displaystring[2] = key;
+            if(_base == displayValue::Dec) _displaystring[0] = key;
+            if(_base == displayValue::Hex) _displaystring[2] = key;
+            if(_base == displayValue::Bin) _displaystring[2] = key;
         }
         else
         {
@@ -35,20 +35,20 @@ void inputBox::processKeyValue(unsigned char key)
         _currentLength++;
 
         // update value
-        switch(_currentBase)
+        switch(_base)
         {
             case Bin:
-                _currentValue = (_currentValue << 1) + (key - '0');
+                _value = (_value << 1) + (key - '0');
                 break;
             case Hex:
-                _currentValue = _currentValue << 4;
+                _value = _value << 4;
                 if(key > '9')
-                    _currentValue += 10 + key - 'A';
+                    _value += 10 + key - 'A';
                 else
-                    _currentValue += key - '0';
+                    _value += key - '0';
                 break;
             case Dec:
-                _currentValue = (_currentValue * 10) + (key - '0');
+                _value = (_value * 10) + (key - '0');
                 break;
             default:
                 break;

@@ -17,7 +17,7 @@
 #include "displayvalue.h"
 #include "inputbox.h"
 #include "area.h"
-#include "status.h"
+#include "statusmessage.h"
 
 // TFT Screen setup
 #define TFT_CS        10
@@ -42,11 +42,11 @@ byte colPins[COLS] = {14,15,16,17,18,19};
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
 // value setup
-displayValue result(0,displayValue::Hex, 16);  // default Decimal mode, start from 0, nothing to show
-inputBox input(0,displayValue::Hex,16);          // default Decimal mode, start from 0, show value
+displayValue result(0,displayValue::Hex, 16, false);  // default Decimal mode, start from 0, nothing to show
+inputBox input(0,displayValue::Hex,16, false);          // default Decimal mode, start from 0, show value
 
 // status box
-status currentstatus(displayValue::Hex, 16, false);
+statusMessage currentstatus(0, displayValue::Hex, 16, false);
 
 void wakeUpNow()
 {
@@ -97,26 +97,26 @@ void loop() {
         break;
       case 'c':
         result.hide();
-        input.set(0);
+        input.setValue(0);
         break;
       case 'h':
-        currentstatus.set(displayValue::Hex);
+        currentstatus.setBase(displayValue::Hex);
         input.setBase(displayValue::Hex);
         result.setBase(displayValue::Hex);
         break;
       case 'b':
-        currentstatus.set(displayValue::Bin);
+        currentstatus.setBase(displayValue::Bin);
         input.setBase(displayValue::Bin);
         result.setBase(displayValue::Bin);
         break;
       case 'd':
-        currentstatus.set(displayValue::Dec);
+        currentstatus.setBase(displayValue::Dec);
         input.setBase(displayValue::Dec);
         result.setBase(displayValue::Dec);
         break;
       
       case '=':
-        result.set(input.get());
+        result.setValue(input.getValue());
         result.show();
       default:
         break;

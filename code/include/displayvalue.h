@@ -1,35 +1,34 @@
 #ifndef DISPLAYVALUE_H
 #define DISPLAYVALUE_H
 
+#include "status.h"
 #include "displayobject.h"
-#include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
-#include "area.h"
 
 #define DISPLAYSTRINGMAX    32+1
-class displayValue: public displayObject
+class displayValue: public displayObject, public status
 {
     public:
-        enum Base
+        displayValue(uint32_t value, status::Base base, uint8_t bitlength, bool sign): status (value, base, bitlength, sign)
         {
-            Dec,
-            Hex,
-            Bin
-        };
+            if(_base == status::Dec) strcpy(_displaystring, "0");
+            if(_base == status::Hex) strcpy(_displaystring, "0x0");
+            if(_base == status::Bin) strcpy(_displaystring, "0b0");
 
-        displayValue(uint32_t value, Base base, uint8_t bitlength);
-        uint32_t get();
-        void set(uint32_t value);
+            _currentLength = 0;
+            _setDigitLimits();
+        }
+
+        void setValue(uint32_t);
+        void setBase(status::Base base);
         void setBitLength(uint8_t bitlength);
-        void setBase(Base newbase);
+        void setSign(bool sign);
 
     protected:
-        uint32_t _currentValue;     
-        uint8_t _currentBitLength;  // current bit length (8/16/32)
         uint8_t _currentLength;     // number of digits currently displaying
         uint8_t _currentMaxLength;  // maximum number of digits to display
-        Base _currentBase;          // current number base
         char _displaystring[DISPLAYSTRINGMAX];    // representation of current value as a string
 
+        void _setDigitLimits();     // sets the limit on the amount of digits, based on the base
         void _display();
         void _setBitLength(uint8_t bitlength);
         void display32bit();
