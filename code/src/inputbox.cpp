@@ -29,6 +29,7 @@ void inputBox::processKeyValue(unsigned char key)
 {
     unsigned char val = key;
     uint64_t max;
+    uint64_t tempval;
 
     // filter apropriate key for this base
     switch(_base)
@@ -91,25 +92,41 @@ void inputBox::processKeyValue(unsigned char key)
                         _value += key - '0';
                     break;
                 case Dec:
-                    _value = (_value * 10) + (key - '0');
-                    // check if we overshoot maximum values
-                    switch(_bitlength)
+                    tempval = (_value * 10) + (key - '0');
+
+                    if(_sign)
                     {
-                        case 8:
-                            max = 0xFF;
-                            break;
-                        case 16:
-                            max = 0xFFFF;
-                            break;
-                        case 32:
-                            max = 0xFFFFFFFF;
-                            break;
+                        if(status::isNegative(_value, _bitlength) == status::isNegative(tempval, _bitlength))
+                            // status unchanged: accept extra digit
+                            _value = tempval;
+                        else
+                        {
+                            _valueToString();
+                            _flashWarning();
+                        }
                     }
-                    if(_value > max)
+                    else
                     {
-                        _value = _value / 10;   // clear out last digit entered
-                        _valueToString();
-                        _flashWarning();
+                        // Unsigned integer in decimal
+                        // check if we overshoot maximum values
+                        switch(_bitlength)
+                        {
+                            case 8:
+                                max = 0xFF;
+                                break;
+                            case 16:
+                                max = 0xFFFF;
+                                break;
+                            case 32:
+                                max = 0xFFFFFFFF;
+                                break;
+                        }
+                        if(tempval > max)
+                        {
+                            _valueToString();
+                            _flashWarning();
+                        }
+                        else _value = tempval; // accept change
                     }
                     break;
                 default:

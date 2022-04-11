@@ -19,7 +19,8 @@ class status
         void setBitLength(uint8_t bitlength);
         uint8_t getBitLength();
         void setSign(bool sign);
-        bool isNegative();
+
+        static bool isNegative(uint32_t value, uint8_t bitlength);
 
     protected:
         uint32_t _value;
@@ -28,6 +29,8 @@ class status
         bool _sign;
 
         void _clipToBitLength();    // clip uint32_t to chosen bitlength mask
+
+
 };
 
 #endif

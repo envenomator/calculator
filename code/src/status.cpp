@@ -51,18 +51,18 @@ uint8_t status::getBitLength()
     return _bitlength;
 }
 
-bool status::isNegative()
+bool status::isNegative(uint32_t value, uint8_t bitlength)
 {
-    switch(_bitlength)
+    switch(bitlength)
     {
         case 8:
-            return _value & 0x80;
+            return value & 0x80;
             break;
         case 16:
-            return _value & 0x8000;
+            return value & 0x8000;
             break;
         case 32:
-            return _value & 0x80000000;
+            return value & 0x80000000;
             break;
         default:
             break;
