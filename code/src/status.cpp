@@ -51,6 +51,25 @@ uint8_t status::getBitLength()
     return _bitlength;
 }
 
+bool status::isNegative()
+{
+    switch(_bitlength)
+    {
+        case 8:
+            return _value & 0x80;
+            break;
+        case 16:
+            return _value & 0x8000;
+            break;
+        case 32:
+            return _value & 0x80000000;
+            break;
+        default:
+            break;
+    }
+    return false;
+}
+
 void status::setSign(bool sign)
 {
     _sign = sign;

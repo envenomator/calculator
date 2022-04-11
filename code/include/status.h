@@ -19,6 +19,7 @@ class status
         void setBitLength(uint8_t bitlength);
         uint8_t getBitLength();
         void setSign(bool sign);
+        bool isNegative();
 
     protected:
         uint32_t _value;
