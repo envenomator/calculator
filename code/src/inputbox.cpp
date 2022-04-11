@@ -2,6 +2,10 @@
 
 void inputBox::deleteDigit()
 {
+    int8_t temp8;
+    int16_t temp16;
+    int32_t temp32;
+
     if(_currentLength)
     {
         _displaystring[strlen(_displaystring)-1] = 0;   // delete last input character
@@ -9,7 +13,29 @@ void inputBox::deleteDigit()
         switch(_base)
         {
             case Dec:
-                _value = _value / 10;
+                if(_sign && status::isNegative(_value,_bitlength))
+                {
+                    switch(_bitlength)
+                    {
+                        // let the compiler handle the correct cast to sign
+                        case 8:
+                            temp8 = (int8_t)_value;
+                            temp8 = temp8 / 10;
+                            _value = temp8;
+                            break;
+                        case 16:
+                            temp16 = (int16_t)_value;
+                            temp16 = temp16 / 10;
+                            _value = temp16;
+                            break;
+                        case 32:
+                            temp32 = (int32_t)_value;
+                            temp32 = temp32 / 10;
+                            _value = temp32;
+                            break;
+                    }
+                }
+                else _value = _value / 10;
                 break;
             case Hex:
                 _value = _value >> 4;
@@ -19,14 +45,22 @@ void inputBox::deleteDigit()
                 break;
         }
         _currentLength--;
-        if(_currentLength == 0) strcat(_displaystring, "0");
+        if(_currentLength == 0)
+        {
+            strcpy(_displaystring, "0");
+            // setting _value explicitly to 0 works for the -X case, when X is deleted
+            _value = 0;
+        }
         _clear();
         _display();
     }
 }
 
 void inputBox::processKeyValue(unsigned char key)
-{
+{   
+    // checks to see if the key is apropriate for this base
+    // then checks to see if the key isn't violating the bitlength maximum
+    // then enters the key into the displaystring and updates the value
     unsigned char val = key;
     uint64_t max;
     uint64_t tempval;

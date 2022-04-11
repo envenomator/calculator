@@ -48,7 +48,7 @@ void displayValue::_valueToString()
                         snprintf(temp, DISPLAYSTRINGMAX, "%" PRId16 "", (uint16_t)_value);
                         break;
                     case 32:
-                        snprintf(temp, DISPLAYSTRINGMAX, "%",PRId32 "", _value);
+                        snprintf(temp, DISPLAYSTRINGMAX, "%" PRId32 "", _value);
                         break;
                 }
             } 
@@ -57,7 +57,10 @@ void displayValue::_valueToString()
                 snprintf(temp, DISPLAYSTRINGMAX, "%" PRIu32 "", _value);
             strcpy(_displaystring, temp);
             _currentLength = strlen(temp);
+            // zero result? - length is zero digits
             if(_currentLength == 1 && temp[0] == '0') _currentLength = 0;
+            // decimal with 2s complement and negative number? - subtract one digit for '-'
+            if(_base == status::Dec && _sign && status::isNegative(_value,_bitlength)) _currentLength--;
             break;
         default:
             break;
