@@ -40,6 +40,11 @@ void status::setBase(status::Base base)
     _base = base;
 }
 
+status::Base status::getBase()
+{
+    return _base;
+}
+
 void status::setBitLength(uint8_t bitlength)
 {
     _bitlength = bitlength;
@@ -73,4 +78,9 @@ bool status::isNegative(uint32_t value, uint8_t bitlength)
 void status::setSign(bool sign)
 {
     _sign = sign;
+}
+
+bool status::getSign()
+{
+    return _sign;
 }

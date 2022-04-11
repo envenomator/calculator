@@ -16,9 +16,11 @@ class status
         uint32_t getValue();
         void setValue(uint32_t value);
         void setBase(Base base);
+        Base getBase();
         void setBitLength(uint8_t bitlength);
         uint8_t getBitLength();
         void setSign(bool sign);
+        bool getSign();
 
         static bool isNegative(uint32_t value, uint8_t bitlength);
 

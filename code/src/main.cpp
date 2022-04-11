@@ -92,6 +92,7 @@ void loop() {
 
   if(key)
   {
+    
     switch(key)
     {
       case '0' ... '9':
@@ -151,7 +152,22 @@ void loop() {
         result.setSign(false);
         currentstatus.setSign(false);
         break;
-      case '^': // change sign
+      case '^': // change sign, if signed decimal
+        if(input.getBase() == status::Dec && input.getSign())
+        {
+            switch(input.getBitLength())
+            {
+              case 8:
+                input.setValue(-(int8_t)(input.getValue()));
+                break;
+              case 16:
+                input.setValue(-(int16_t)(input.getValue()));
+                break;
+              case 32:
+                input.setValue(-(int32_t)(input.getValue()));
+                break;
+            }
+        }
         break;
       case '!': // Bitwise NOT
         if(result.getValue() != 0 && input.getValue() == 0)
@@ -166,13 +182,22 @@ void loop() {
       case '=':
         if(op.inProgress())
         {
-          result.setValue(op.perform(result.getValue(),input.getValue(),input.getBitLength()));
+          result.setValue(op.perform(result.getValue(),input.getValue(),input.getBitLength(),input.getBase()));
         }
         else
         {
           result.setValue(input.getValue());
         }
         result.show();
+        if(op.error())
+        { 
+          op.showError();
+          while(op.error()) // blocked wait until user acknowledges error
+          {
+            key = keypad.getKey();
+            if(key == 'c' || key == 'X') op.clearError();
+          }
+        }
         op.hide();
         op.set(operation::None);
         input.setValue(0);

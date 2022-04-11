@@ -42,13 +42,13 @@ void displayValue::_valueToString()
                 switch(_bitlength)
                 {
                     case 8:
-                        snprintf(temp, DISPLAYSTRINGMAX, "%" PRIi8 "", (uint8_t)_value);
+                        snprintf(temp, DISPLAYSTRINGMAX, "%" PRIi8 "", (int8_t)_value);
                         break;
                     case 16:
-                        snprintf(temp, DISPLAYSTRINGMAX, "%" PRId16 "", (uint16_t)_value);
+                        snprintf(temp, DISPLAYSTRINGMAX, "%" PRId16 "", (int16_t)_value);
                         break;
                     case 32:
-                        snprintf(temp, DISPLAYSTRINGMAX, "%" PRId32 "", _value);
+                        snprintf(temp, DISPLAYSTRINGMAX, "%" PRId32 "", (int32_t)_value);
                         break;
                 }
             } 
