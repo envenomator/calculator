@@ -160,6 +160,8 @@ void loop() {
       case '^': // change sign, if signed decimal
         if(input.getBase() == status::Dec && input.getSign())
         {
+            input.negateDisplay();
+            /*
             switch(input.getBitLength())
             {
               case 8:
@@ -172,6 +174,7 @@ void loop() {
                 input.setValue(-(int32_t)(input.getValue()));
                 break;
             }
+            */
         }
         break;
       case '!': // Bitwise NOT

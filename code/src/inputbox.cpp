@@ -47,13 +47,46 @@ void inputBox::deleteDigit()
         _currentLength--;
         if(_currentLength == 0)
         {
-            strcpy(_displaystring, "0");
-            // setting _value explicitly to 0 works for the -X case, when X is deleted
             _value = 0;
+            _valueToString();
         }
         _clear();
         _display();
     }
+}
+
+void inputBox::negateDisplay()
+{
+    _negateValue();
+
+    if(_show)
+    {
+        _clear();
+        _display();
+    }
+}
+
+void inputBox::_negateValue()
+{
+    // Negates the value (only on Dec display with sign)
+
+    switch(_bitlength)
+    {
+        // negate value, let the compiler handle negation by casting to signed it
+        case 8:
+            _value = -(int8_t)(_value);
+            break;
+        case 16:
+            _value = -(int16_t)(_value);
+            break;
+        case 32:
+            _value = -(int32_t)(_value);
+            break;
+    }
+
+    _valueToString();
+
+    if(_value == 0) strcpy(_displaystring,"-"); // negate was requested on '0' (only on Dec display)
 }
 
 void inputBox::processKeyValue(unsigned char key)
@@ -65,7 +98,7 @@ void inputBox::processKeyValue(unsigned char key)
     uint64_t max;
     uint64_t tempval;
 
-    bool negval,negtemp;
+    bool negval = false,negtemp;
 
     // filter apropriate key for this base
     switch(_base)
@@ -99,10 +132,20 @@ void inputBox::processKeyValue(unsigned char key)
         {
             if(key != '0') // don't process extra zeroes when 0 on screen
             {
-                // Just replace the on-screen '0' at the right position
-                if(_base == Dec) _displaystring[0] = key;
-                if(_base == Hex) _displaystring[2] = key;
-                if(_base == Bin) _displaystring[2] = key;
+                if(_displaystring[0] == '-')
+                {
+                    // append the negative number after the '-'
+                    strncat(_displaystring,(const char *)&val, 1);
+                    negval = true;
+                }
+                else
+                {
+                    // Positive number or 0
+                    // Just replace the on-screen '0' at the right position
+                    if(_base == Dec) _displaystring[0] = key;
+                    if(_base == Hex) _displaystring[2] = key;
+                    if(_base == Bin) _displaystring[2] = key;
+                }
                 _currentLength++;
             }
         }
@@ -131,11 +174,28 @@ void inputBox::processKeyValue(unsigned char key)
 
                     if(_sign)
                     {
-                        negval = status::isNegative(_value,_bitlength);
-                        if(negval)
-                            tempval = (_value * 10) - (key - '0');
-                        else
-                            tempval = (_value * 10) + (key - '0');
+                        // '-' entered or actual negative _value in store
+                        if(!negval) negval = status::isNegative(_value,_bitlength);
+
+                        // add key in correct +/- fashion and cast to correct bitlength
+                        switch(_bitlength)
+                        {
+                            case 8:
+                                if(negval) tempval = (int8_t)((int8_t)(_value)*10 - (key - '0'));
+                                else tempval = (int8_t)((int8_t)(_value)*10 + (key - '0'));
+                                tempval &= 0xFF;
+                                break;
+                            case 16:
+                                if(negval) tempval = (int16_t)((int16_t)(_value)*10 - (key - '0'));
+                                else tempval = (int16_t)((int16_t)(_value)*10 + (key - '0'));
+                                tempval &= 0xFFFF;
+                                break;
+                            case 32:
+                                if(negval) tempval = (int32_t)((int32_t)(_value)*10 - (key - '0'));
+                                else tempval = (int32_t)((int32_t)(_value)*10 + (key - '0'));
+                                tempval &= 0xFFFFFFFF;
+                                break;
+                        }
                         negtemp = status::isNegative(tempval,_bitlength);
 
                         if(negval == negtemp)
@@ -147,7 +207,7 @@ void inputBox::processKeyValue(unsigned char key)
                             _flashWarning();
                         }
                     }
-                    else
+                    else // Unsigned number
                     {
                         tempval = (_value * 10) + (key - '0');
                         // Unsigned integer in decimal
