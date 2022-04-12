@@ -18,6 +18,7 @@
 #include "inputbox.h"
 #include "area.h"
 #include "statusmessage.h"
+#include "statusflags.h"
 #include "operation.h"
 
 // TFT Screen setup
@@ -48,6 +49,7 @@ inputBox input(0,status::Hex,16, false);          // default Decimal mode, start
 
 // status box
 statusMessage currentstatus(0, status::Hex, 16, false);
+statusFlags flags;
 operation op;
 
 void wakeUpNow()
@@ -71,6 +73,7 @@ void setup(void) {
 
   // attach screen object and asign area to each output object
   result.init(&tft, area(0,0,319,23), ST77XX_WHITE);
+  flags.init(&tft,area(0,30,319,46), ST77XX_YELLOW);
   op.init(&tft, area(0,75,319,99), ST77XX_BLUE);
   input.init(&tft, area(0,100,319,129), ST77XX_BLUE);
   currentstatus.init(&tft, area(0,224,319,239), ST77XX_GREEN);
@@ -107,6 +110,8 @@ void loop() {
         result.hide();
         op.set(operation::Method::None);
         op.hide();
+        flags.hide();
+        flags.clearFlags();
         input.setValue(0);
         break;
       case 'h':
@@ -175,20 +180,22 @@ void loop() {
         else
           result.setValue(~(input.getValue()));
         result.show();
+        flags.setFlags(false,status::isNegative(result.getValue(),result.getBitLength()),false);
+        flags.show();
         op.hide();
         op.set(operation::None);
         input.setValue(0);
         break;
       case '=':
-        if(op.inProgress())
-        {
-          result.setValue(op.perform(result.getValue(),input.getValue(),input.getBitLength(),input.getBase()));
-        }
-        else
-        {
-          result.setValue(input.getValue());
-        }
+        // clear old flags first
+        //currentstatus.clearFlags();
+        if(!op.inProgress()) result.setValue(input.getValue());
+        // always perform an operation at =, even 'None'
+        result.setValue(op.perform(result.getValue(),input.getValue(),input.getBitLength(),input.getBase()));
         result.show();
+        flags.setFlags(op.getCarry(),status::isNegative(result.getValue(),result.getBitLength()),op.getOverflow());
+        flags.show();
+        // wait for any errors
         if(op.error())
         { 
           op.showError();
@@ -198,6 +205,7 @@ void loop() {
             if(key == 'c' || key == 'X') op.clearError();
           }
         }
+        // clear operation and reset input
         op.hide();
         op.set(operation::None);
         input.setValue(0);

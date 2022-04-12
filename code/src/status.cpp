@@ -75,6 +75,25 @@ bool status::isNegative(uint32_t value, uint8_t bitlength)
     return false;
 }
 
+bool status::hasCarry(uint64_t value, uint8_t bitlength)
+{
+    switch(bitlength)
+    {
+        case 8:
+            return value & 0x100;
+            break;
+        case 16:
+            return value & 0x10000;
+            break;
+        case 32:
+            return value & 0x100000000;
+            break;
+        default:
+            break;
+    }
+    return false;
+}
+
 void status::setSign(bool sign)
 {
     _sign = sign;

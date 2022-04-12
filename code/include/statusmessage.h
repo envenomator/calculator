@@ -15,7 +15,6 @@ class statusMessage: public displayObject, public status
 
     private:
         void _display();
-
 };
 
 #endif

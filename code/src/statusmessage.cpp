@@ -58,6 +58,7 @@ void statusMessage::_display()
         else
             strcat(message, " unsigned");
     }
+
     // Display message
     _tft->setTextSize(2);
     _tft->setTextColor(_fgcolor,_bgcolor);

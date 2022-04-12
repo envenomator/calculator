@@ -27,6 +27,8 @@ operation::operation()
     _active = false;
     _currentmethod = Method::None;
     _errorstatus = false;
+    _carryflag = false;
+    _overflowflag = false;
 }
 
 bool operation::error()
@@ -39,15 +41,32 @@ bool operation::inProgress()
     return _active;
 }
 
+bool operation::getCarry()
+{
+    return _carryflag;
+}
+
+bool operation::getOverflow()
+{
+    return _overflowflag;
+}
+
 uint32_t operation::perform(uint32_t opA, uint32_t opB, uint8_t bitlength, status::Base base)
 {
     uint64_t result = 0;
+    bool negA, negB, negResult;
 
     _errorstatus = false;   // start out positive
+    _carryflag = false;     // disregard any old carry flag
+    _overflowflag = false;  // disregard any old overflow flag
+
+    negA = status::isNegative(opA,bitlength);
+    negB = status::isNegative(opB,bitlength);
 
     switch(_currentmethod)
     {
         case Method::None:
+            result = opA;
             break;
         case Method::And:
             result = opA & opB;
@@ -91,13 +110,23 @@ uint32_t operation::perform(uint32_t opA, uint32_t opB, uint8_t bitlength, statu
             break;
         case Method::Minus:
             result = opA - opB;
+            // Check overflow flag
+            negResult = status::isNegative(result, bitlength);
+            if(!negA && negB && negResult) _overflowflag = true;    // + min - results in -
+            if(negA && !negB && !negResult) _overflowflag = true;   // - min + results in +
             break;
         case Method::Plus:
             result = opA + opB;
+            // Check overflow flag
+            negResult = status::isNegative(result, bitlength);
+            if(negA && negB && !negResult) _overflowflag = true;    // + plus + results in -
+            if(!negA && !negB && negResult) _overflowflag = true;   // - plus - results in +
             break;
         default:
             break; 
     }
+    _carryflag = status::hasCarry(result, bitlength);
+    _currentmethod = operation::None;   // clear operation for next, even when 'empty'
     return (uint32_t)result;
 }
 

@@ -23,6 +23,7 @@ class status
         bool getSign();
 
         static bool isNegative(uint32_t value, uint8_t bitlength);
+        static bool hasCarry(uint64_t value, uint8_t bitlength);
 
     protected:
         uint32_t _value;
