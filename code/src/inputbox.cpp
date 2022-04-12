@@ -84,6 +84,7 @@ void inputBox::_negateValue()
             break;
     }
 
+    _clipToBitLength();
     _valueToString();
 
     if(_value == 0) strcpy(_displaystring,"-"); // negate was requested on '0' (only on Dec display)
@@ -95,10 +96,11 @@ void inputBox::processKeyValue(unsigned char key)
     // then checks to see if the key isn't violating the bitlength maximum
     // then enters the key into the displaystring and updates the value
     unsigned char val = key;
-    uint64_t max;
+    uint64_t min,max;
     uint64_t tempval;
+    uint32_t temp2val;
 
-    bool negval = false,negtemp;
+    bool negval = false;
 
     // filter apropriate key for this base
     switch(_base)
@@ -130,17 +132,17 @@ void inputBox::processKeyValue(unsigned char key)
     {
         if(_currentLength == 0)
         {
+            // first digit to enter
             if(key != '0') // don't process extra zeroes when 0 on screen
             {
-                if(_displaystring[0] == '-')
+                if(_displaystring[0] == '-') // - on screen?
                 {
-                    // append the negative number after the '-'
+                    // append the digit after the '-'
                     strncat(_displaystring,(const char *)&val, 1);
                     negval = true;
                 }
-                else
+                else // 0 on screen
                 {
-                    // Positive number or 0
                     // Just replace the on-screen '0' at the right position
                     if(_base == Dec) _displaystring[0] = key;
                     if(_base == Hex) _displaystring[2] = key;
@@ -149,7 +151,7 @@ void inputBox::processKeyValue(unsigned char key)
                 _currentLength++;
             }
         }
-        else
+        else // 2nd digit to enter, just append it
         {
             strncat(_displaystring, (const char *)&val, 1);
             _currentLength++;
@@ -177,35 +179,58 @@ void inputBox::processKeyValue(unsigned char key)
                         // '-' entered or actual negative _value in store
                         if(!negval) negval = status::isNegative(_value,_bitlength);
 
-                        // add key in correct +/- fashion and cast to correct bitlength
-                        switch(_bitlength)
-                        {
-                            case 8:
-                                if(negval) tempval = (int8_t)((int8_t)(_value)*10 - (key - '0'));
-                                else tempval = (int8_t)((int8_t)(_value)*10 + (key - '0'));
-                                tempval &= 0xFF;
-                                break;
-                            case 16:
-                                if(negval) tempval = (int16_t)((int16_t)(_value)*10 - (key - '0'));
-                                else tempval = (int16_t)((int16_t)(_value)*10 + (key - '0'));
-                                tempval &= 0xFFFF;
-                                break;
-                            case 32:
-                                if(negval) tempval = (int32_t)((int32_t)(_value)*10 - (key - '0'));
-                                else tempval = (int32_t)((int32_t)(_value)*10 + (key - '0'));
-                                tempval &= 0xFFFFFFFF;
-                                break;
-                        }
-                        negtemp = status::isNegative(tempval,_bitlength);
+                        //if(negval) tempval = (_value*10) - (key - '0');
+                        //else tempval = (_value*10) + (key - '0');
+                        // DEBUG
+                        tempval = (_value*10) + (key - '0');
 
-                        if(negval == negtemp)
-                            // status unchanged: accept extra digit
-                            _value = tempval;
-                        else
+                        // DEBUG
+
+//                        switch(_bitlength)
+//                        {
+//                            case 8:
+//                                if(negval)
+//                                {
+//                                    min = 0x80;
+//                                    max = 0xFF;
+//                                }
+//                                else max = 0x7F;
+                            max = 0xFF;
+                                temp2val = tempval &= 0xFF;
+//                                break;
+//                            case 16:
+//                                if(negval)
+//                                {
+//                                    min = 0x8000;
+//                                    max = 0xFFFF;
+//                                }
+//                                else max = 0x7FFF;
+//                                temp2val = tempval &= 0xFFFF;
+//                                break;
+//                            case 32:
+//                                if(negval)
+//                                {
+//                                    min = 0x80000000;
+//                                    max = 0xFFFFFFFF;
+//                                }
+//                                else max = 0x7FFFFFFF;
+//                                temp2val = tempval &= 0xFFFFFFFF;
+//                                break;
+//                        }
+
+//                        if((!negval && (tempval <= max)))// ||
+//    if(tempval <= max)
+//                        //   ( negval && (min <= tempval) && (tempval >= max)))
+//                        {
+//                            _value = temp2val;
+//                        }
+//                        else
+                        if(tempval > max)
                         {
-                            _valueToString();
+                            _valueToString(); // take previous _value and re-display
                             _flashWarning();
                         }
+                        else _value = tempval;
                     }
                     else // Unsigned number
                     {
