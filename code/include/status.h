@@ -29,7 +29,7 @@ class status
         uint32_t _value;
         Base _base;
         uint8_t _bitlength;
-        bool _sign;
+        bool _sign;                 // display sign in Dec mode / 2s complement only
 
         void _clipToBitLength();    // clip uint32_t to chosen bitlength mask
 

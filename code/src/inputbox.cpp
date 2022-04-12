@@ -65,6 +65,8 @@ void inputBox::processKeyValue(unsigned char key)
     uint64_t max;
     uint64_t tempval;
 
+    bool negval,negtemp;
+
     // filter apropriate key for this base
     switch(_base)
     {
@@ -126,11 +128,17 @@ void inputBox::processKeyValue(unsigned char key)
                         _value += key - '0';
                     break;
                 case Dec:
-                    tempval = (_value * 10) + (key - '0');
 
                     if(_sign)
                     {
-                        if(status::isNegative(_value, _bitlength) == status::isNegative(tempval, _bitlength))
+                        negval = status::isNegative(_value,_bitlength);
+                        if(negval)
+                            tempval = (_value * 10) - (key - '0');
+                        else
+                            tempval = (_value * 10) + (key - '0');
+                        negtemp = status::isNegative(tempval,_bitlength);
+
+                        if(negval == negtemp)
                             // status unchanged: accept extra digit
                             _value = tempval;
                         else
@@ -141,6 +149,7 @@ void inputBox::processKeyValue(unsigned char key)
                     }
                     else
                     {
+                        tempval = (_value * 10) + (key - '0');
                         // Unsigned integer in decimal
                         // check if we overshoot maximum values
                         switch(_bitlength)
