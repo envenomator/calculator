@@ -98,20 +98,6 @@ uint32_t operation::perform(uint32_t opA, uint32_t opB, uint8_t bitlength, statu
         default:
             break; 
     }
-    // overflow check
-    switch(bitlength)
-    {
-        case 8:
-            _errorstatus = result & 0x100;
-            break;
-        case 16:
-            _errorstatus = result & 0x10000;
-            break;
-        case 32:
-            _errorstatus = result & 0x100000000;
-            break;
-    }
-    if(_errorstatus) strcpy(_displaystring,"Overflow");
     return (uint32_t)result;
 }
 
