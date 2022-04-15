@@ -35,6 +35,25 @@ void status::_clipToBitLength()
     }
 }
 
+uint32_t status::clipToBitLength(uint32_t value, uint8_t bitlength)
+{
+    uint32_t temp;
+
+    switch(bitlength)
+    {
+        case 8:
+            temp = value & 0xFF;
+            break;
+        case 16:
+            temp = value & 0xFFFF;
+            break;
+        case 32:
+            temp = value & 0xFFFFFFFF;
+            break;
+    }
+    return temp;
+}
+
 void status::setBase(status::Base base)
 {
     _base = base;

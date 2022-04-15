@@ -51,7 +51,7 @@ bool operation::getOverflow()
     return _overflowflag;
 }
 
-uint32_t operation::perform(uint32_t opA, uint32_t opB, uint8_t bitlength, status::Base base)
+uint32_t operation::perform(uint32_t opA, uint32_t opB, uint8_t bitlength, status::Base base, bool sign)
 {
     uint64_t result = 0;
     bool negA, negB, negResult;
@@ -93,7 +93,33 @@ uint32_t operation::perform(uint32_t opA, uint32_t opB, uint8_t bitlength, statu
             result = maskToBitLength((opA >> opB) | (opA << (bitlength - opB)),bitlength);
             break;
         case Method::Modulo:
-            result = opA % opB;
+            if(opB == 0)
+            {
+                _errorstatus = true;
+                strcpy(_displaystring, "Divide by 0");
+                return 0; // avoid divide by 0
+            }
+            else
+            {
+                if(sign)
+                {
+                    switch(bitlength)
+                    {
+                        case 8:
+                            result = (int8_t)((int8_t)opA % (int8_t)opB);
+                            break;
+                        case 16:
+                            result = (int16_t)((int16_t)opA % (int16_t)opB);
+                            break;
+                        case 32:
+                            result = (int32_t)((int32_t)opA % (int32_t)opB);
+                            break;
+                        default:
+                            result = 0;
+                    }
+                }
+                else result = opA % opB;
+            }
             break;
         case Method::Divide:
             if(opB == 0)
@@ -103,7 +129,26 @@ uint32_t operation::perform(uint32_t opA, uint32_t opB, uint8_t bitlength, statu
                 return 0; // avoid divide by 0
             }
             else
-                result = opA / opB;
+            {
+                if(sign)
+                {
+                    switch(bitlength)
+                    {
+                        case 8:
+                            result = (int8_t)((int8_t)opA / (int8_t)opB);
+                            break;
+                        case 16:
+                            result = (int16_t)((int16_t)opA / (int16_t)opB);
+                            break;
+                        case 32:
+                            result = (int32_t)((int32_t)opA / (int32_t)opB);
+                            break;
+                        default:
+                            result = 0;
+                    }
+                }
+                else result = opA / opB;
+            }
             break;
         case Method::Multiply:
             result = opA * opB;

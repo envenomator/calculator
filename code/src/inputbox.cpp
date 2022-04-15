@@ -96,11 +96,13 @@ void inputBox::processKeyValue(unsigned char key)
     // then checks to see if the key isn't violating the bitlength maximum
     // then enters the key into the displaystring and updates the value
     unsigned char val = key;
-    uint64_t min,max;
-    uint64_t tempval;
-    uint32_t temp2val;
-
-    bool negval = false;
+    uint8_t n;
+    uint32_t t1,t2;
+    uint32_t max;
+    uint32_t min;
+    uint64_t tempval,tempval2;
+    bool overflow;
+    bool acceptinput = false;
 
     // filter apropriate key for this base
     switch(_base)
@@ -139,7 +141,6 @@ void inputBox::processKeyValue(unsigned char key)
                 {
                     // append the digit after the '-'
                     strncat(_displaystring,(const char *)&val, 1);
-                    negval = true;
                 }
                 else // 0 on screen
                 {
@@ -164,6 +165,7 @@ void inputBox::processKeyValue(unsigned char key)
             {
                 case Bin:
                     _value = (_value << 1) + (key - '0');
+                    acceptinput = true;
                     break;
                 case Hex:
                     _value = _value << 4;
@@ -171,71 +173,83 @@ void inputBox::processKeyValue(unsigned char key)
                         _value += 10 + key - 'A';
                     else
                         _value += key - '0';
+                    
+                    acceptinput = true;
                     break;
                 case Dec:
-
                     if(_sign)
                     {
-                        // '-' entered or actual negative _value in store
-                        if(!negval) negval = status::isNegative(_value,_bitlength);
-
-                        //if(negval) tempval = (_value*10) - (key - '0');
-                        //else tempval = (_value*10) + (key - '0');
-                        // DEBUG
-                        tempval = (_value*10) + (key - '0');
-
-                        // DEBUG
-
-//                        switch(_bitlength)
-//                        {
-//                            case 8:
-//                                if(negval)
-//                                {
-//                                    min = 0x80;
-//                                    max = 0xFF;
-//                                }
-//                                else max = 0x7F;
-                            max = 0xFF;
-                                temp2val = tempval &= 0xFF;
-//                                break;
-//                            case 16:
-//                                if(negval)
-//                                {
-//                                    min = 0x8000;
-//                                    max = 0xFFFF;
-//                                }
-//                                else max = 0x7FFF;
-//                                temp2val = tempval &= 0xFFFF;
-//                                break;
-//                            case 32:
-//                                if(negval)
-//                                {
-//                                    min = 0x80000000;
-//                                    max = 0xFFFFFFFF;
-//                                }
-//                                else max = 0x7FFFFFFF;
-//                                temp2val = tempval &= 0xFFFFFFFF;
-//                                break;
-//                        }
-
-//                        if((!negval && (tempval <= max)))// ||
-//    if(tempval <= max)
-//                        //   ( negval && (min <= tempval) && (tempval >= max)))
-//                        {
-//                            _value = temp2val;
-//                        }
-//                        else
-                        if(tempval > max)
+                        // signed number
+                        // configure min/max for positive/negative number in signed
+                        switch(_bitlength)
                         {
-                            _valueToString(); // take previous _value and re-display
-                            _flashWarning();
+                            case 8:
+                                max = 0x7F;
+                                min = 0x80;
+                                break;
+                            case 16:
+                                max = 0x7FFF;
+                                min = 0x8000;
+                                break;
+                            case 32:
+                                max = 0x7FFFFFFF;
+                                min = 0x80000000;
+                                break;
                         }
-                        else _value = tempval;
+                        if(_displaystring[0] == '-') 
+                        {
+                            // negative number in input
+                            // start out with (key - '0'), so _value becomes negative always first
+                            if(_currentLength == 1)
+                            {
+                                tempval = -(key - '0');
+                                tempval = status::clipToBitLength(tempval, _bitlength);
+                                acceptinput = true;
+                            }  
+                            // for subsequent keys do
+                            // do _value * 10 - (key -'0'), or
+                            // do (_value * 8) + (_value * 2) - (key - '0') or
+                            // do (_value <<3) + (_value <<1) - (key - '0') and check overflow at each step
+                            else
+                            {
+                                overflow = false;
+                                t1 = _value;
+                                for(n = 0; n < 3; n++) // << 3 first
+                                {
+                                    t1 = t1 << 1;
+                                    if((t1 & min) == 0)
+                                    {
+                                        // we went from negative to positive
+                                        overflow = true;
+                                        break;
+                                    }
+                                }
+                                if(overflow) break;
+                                t2 = _value << 1;
+                                if((t2 & min) == 0) break;
+                                tempval = t1 + t2;
+                                if((tempval & min) == 0) break;
+                                tempval2 = (key -'0');
+                                tempval -= tempval2;
+                                if((tempval & min) == 0) break;
+
+                                tempval = status::clipToBitLength(tempval, _bitlength);
+                                acceptinput = true; 
+                            }
+
+                        }
+                        else 
+                        {
+                            // positive number in input or 0
+                            tempval = (_value * 10) + (key - '0'); 
+                            tempval = status::clipToBitLength(tempval, _bitlength);
+                            if(tempval <= max) acceptinput = true;
+                        }
                     }
-                    else // Unsigned number
+                    else
                     {
-                        tempval = (_value * 10) + (key - '0');
                         // Unsigned integer in decimal
+                        tempval = (_value * 10) + (key - '0');
                         // check if we overshoot maximum values
                         switch(_bitlength)
                         {
@@ -249,20 +263,22 @@ void inputBox::processKeyValue(unsigned char key)
                                 max = 0xFFFFFFFF;
                                 break;
                         }
-                        if(tempval > max)
-                        {
-                            _valueToString();
-                            _flashWarning();
-                        }
-                        else _value = tempval; // accept change
+                        if(tempval <= max) acceptinput = true;
+                        tempval = status::clipToBitLength(tempval, _bitlength);
                     }
+                    if(acceptinput) _value = tempval;
                     break;
                 default:
                     break;
             }
         }
     }
-    else _flashWarning();
+
+    if(!acceptinput)
+    {
+        _valueToString();
+        _flashWarning();
+    }
 
     // display
     if(_show) _display();

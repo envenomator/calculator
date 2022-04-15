@@ -30,7 +30,7 @@ class operation: public displayObject
 
         operation();
         void set(Method currentmethod);
-        uint32_t perform(uint32_t opA, uint32_t opB, uint8_t bitlength, status::Base base);
+        uint32_t perform(uint32_t opA, uint32_t opB, uint8_t bitlength, status::Base base, bool sign=false);
         bool inProgress();
         bool getCarry();                // get carry flag for last operation
         bool getOverflow();             // get overflow flag for last operation

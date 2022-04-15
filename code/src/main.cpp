@@ -44,11 +44,11 @@ byte colPins[COLS] = {14,15,16,17,18,19};
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
 // value setup
-displayValue result(0,status::Hex, 16, false);  // default Decimal mode, start from 0, nothing to show
-inputBox input(0,status::Hex,16, false);          // default Decimal mode, start from 0, show value
+displayValue result(0,status::Dec, 8, true);  // default Decimal mode, start from 0, nothing to show
+inputBox input(0,status::Dec,8, true);          // default Decimal mode, start from 0, show value
 
 // status box
-statusMessage currentstatus(0, status::Hex, 16, false);
+statusMessage currentstatus(0, status::Dec, 8, true);
 statusFlags flags;
 operation op;
 
@@ -194,7 +194,7 @@ void loop() {
         //currentstatus.clearFlags();
         if(!op.inProgress()) result.setValue(input.getValue());
         // always perform an operation at =, even 'None'
-        result.setValue(op.perform(result.getValue(),input.getValue(),input.getBitLength(),input.getBase()));
+        result.setValue(op.perform(result.getValue(),input.getValue(),input.getBitLength(),input.getBase(),input.getSign()));
         result.show();
         flags.setFlags(op.getCarry(),status::isNegative(result.getValue(),result.getBitLength()),op.getOverflow());
         flags.show();

@@ -25,13 +25,15 @@ class status
         static bool isNegative(uint32_t value, uint8_t bitlength);
         static bool hasCarry(uint64_t value, uint8_t bitlength);
 
+        static uint32_t clipToBitLength(uint32_t val, uint8_t bitlength);  //clip any uint32_t to length;
+
     protected:
         uint32_t _value;
         Base _base;
         uint8_t _bitlength;
         bool _sign;                 // display sign in Dec mode / 2s complement only
 
-        void _clipToBitLength();    // clip uint32_t to chosen bitlength mask
+        void _clipToBitLength();    // clip _value with uint32_t to chosen bitlength mask
 
 
 };
