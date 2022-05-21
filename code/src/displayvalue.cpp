@@ -18,14 +18,34 @@ void displayValue::setValue(uint32_t value)
 void displayValue::_valueToString()
 {
     char temp[DISPLAYSTRINGMAX];
+    char *tmp;
+    uint32_t v;
+
     // prepare display string
     switch(_base)
     {
         case Bin:
-            itoa(_value, temp, 2);
             strcpy(_displaystring, "0b");
-            strcat(_displaystring, temp);
-            _currentLength = strlen(temp);
+
+            // convert 32-bit integer to 32 character string with 0/1s
+            v = _value;
+            tmp = temp + 31;
+
+            for(uint8_t i = 0; i < 32; i++)
+            {
+                *tmp = (v & 0x1) + 48;
+                tmp--;
+                v = v >> 1;
+            }
+            temp[32] = 0;
+
+            // find first non-zero character
+            tmp = temp;
+            while(*tmp == '0' && *(tmp+1) != 0) tmp++;
+
+            strcat(_displaystring, tmp);
+
+            _currentLength = strlen(tmp);
             if(_currentLength == 1 && temp[0] == '0') _currentLength = 0;
             break;
         case Hex:
@@ -135,9 +155,34 @@ void displayValue::setSign(bool sign)
 
 void displayValue::_display()
 {
-    _tft->setTextSize(3);
+    uint8_t fontsize;
+    uint8_t length;
+
+    if(_base == status::Bin)
+    {
+        length = strlen(_displaystring);
+        if(length < 18)
+            fontsize = 3;
+        else
+        {
+            if(length < 27)
+                fontsize = 2;
+            else
+                fontsize = 1;
+        }
+    }
+    else fontsize = 3; // Hex and Dec -- large font
+
+    // do we need to clear our display area when the fontsize changed?
+    if(_fontsize != fontsize)
+    {
+        _fontsize = fontsize;
+        _fontwidth = (_fontsize * 5) + _fontsize; // calculate new font width
+        _clear();
+    }
+    _tft->setTextSize(_fontsize);
     _tft->setTextColor(_fgcolor,_bgcolor);
-    _tft->setCursor(_tftarea.getBottomRight().getx() - (strlen(_displaystring) * 18 - 1),
+    _tft->setCursor(_tftarea.getBottomRight().getx() - (strlen(_displaystring) * _fontwidth - 1),
                     _tftarea.getTopLeft().gety());
     _tft->print(_displaystring);
 }

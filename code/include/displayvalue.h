@@ -4,7 +4,7 @@
 #include "status.h"
 #include "displayobject.h"
 
-#define DISPLAYSTRINGMAX    32+1
+#define DISPLAYSTRINGMAX    32+3 // for 0b / 0x etc, two chars extra
 class displayValue: public displayObject, public status
 {
     public:
@@ -16,6 +16,8 @@ class displayValue: public displayObject, public status
 
             _currentLength = 0;
             _setDigitLimits();
+            _fontsize = 0;  // invalid default, will be set at first _display()
+            _fontwidth = 0; // invalid default
         }
 
         void setValue(uint32_t);
@@ -33,6 +35,9 @@ class displayValue: public displayObject, public status
         void _valueToString();
         void _setBitLength(uint8_t bitlength);
         void display32bit();
+
+        uint8_t _fontsize;
+        uint8_t _fontwidth;
 
     private:
         const char *bit_rep[16] = {
