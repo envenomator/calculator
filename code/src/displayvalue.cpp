@@ -41,7 +41,7 @@ void displayValue::_valueToString()
 
             // find first non-zero character
             tmp = temp;
-            while(*tmp == '0' && *(tmp+1) != 0) tmp++;
+            while((*tmp == '0') && (*(tmp+1) != 0)) tmp++;
 
             strcat(_displaystring, tmp);
 
@@ -157,6 +157,11 @@ void displayValue::_display()
 {
     uint8_t fontsize;
     uint8_t length;
+    uint8_t blocks,startchars,i;
+    uint16_t altcolor = ST77XX_CYAN;
+
+    char buffer[5];
+    char *ptr;
 
     if(_base == status::Bin)
     {
@@ -184,7 +189,42 @@ void displayValue::_display()
     _tft->setTextColor(_fgcolor,_bgcolor);
     _tft->setCursor(_tftarea.getBottomRight().getx() - (strlen(_displaystring) * _fontwidth - 1),
                     _tftarea.getTopLeft().gety());
-    _tft->print(_displaystring);
+    switch(_base)
+    {
+        case Dec:
+            _tft->print(_displaystring);
+            break;
+        case Bin:
+            _clear();
+            _tft->print("0b");
+            if(_currentLength == 0) _tft->print("0");
+
+            blocks = _currentLength >> 2;
+            startchars = _currentLength % 4;
+            ptr = _displaystring + 2;
+
+            buffer[4] = 0;
+            strncpy(buffer, ptr, startchars);
+            ptr += startchars;
+            buffer[startchars] = 0;
+            _tft->setTextColor(blocks&1?_fgcolor:altcolor);
+            _tft->print(buffer);
+
+            for(i = 0; i < blocks; i++)
+            {
+                if(blocks & 1)
+                    _tft->setTextColor(i&1?_fgcolor:altcolor);
+                else
+                    _tft->setTextColor(i&1?altcolor:_fgcolor);
+                strncpy(buffer, ptr, 4);
+                _tft->print(buffer);
+                ptr += 4;
+            }
+            break;
+        case Hex:
+            _tft->print(_displaystring);
+            break;
+    }
 }
 
 void displayValue::display32bit()
