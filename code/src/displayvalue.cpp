@@ -158,7 +158,6 @@ void displayValue::_display()
     uint8_t fontsize;
     uint8_t length;
     uint8_t blocks,startchars,i;
-    uint16_t altcolor = ST77XX_CYAN;
 
     char buffer[5];
     char *ptr;
@@ -178,24 +177,28 @@ void displayValue::_display()
     }
     else fontsize = 3; // Hex and Dec -- large font
 
-    // do we need to clear our display area when the fontsize changed?
+    //clear the are when the fontsize changes
     if(_fontsize != fontsize)
     {
         _fontsize = fontsize;
         _fontwidth = (_fontsize * 5) + _fontsize; // calculate new font width
         _clear();
     }
+
+    // setup start position and fontsizes
     _tft->setTextSize(_fontsize);
     _tft->setTextColor(_fgcolor,_bgcolor);
     _tft->setCursor(_tftarea.getBottomRight().getx() - (strlen(_displaystring) * _fontwidth - 1),
                     _tftarea.getTopLeft().gety());
+
+    // handle each base differently on display
     switch(_base)
     {
         case Dec:
             _tft->print(_displaystring);
             break;
         case Bin:
-            _clear();
+            _clear();   // needed for color block changes on most entries
             _tft->print("0b");
             if(_currentLength == 0) _tft->print("0");
 
@@ -207,15 +210,19 @@ void displayValue::_display()
             strncpy(buffer, ptr, startchars);
             ptr += startchars;
             buffer[startchars] = 0;
-            _tft->setTextColor(blocks&1?_fgcolor:altcolor);
+            if(blocks)
+                _tft->setTextColor(blocks&1?_altcolor:_fgcolor);
+            else
+                _tft->setTextColor(_fgcolor);
             _tft->print(buffer);
 
             for(i = 0; i < blocks; i++)
             {
+
                 if(blocks & 1)
-                    _tft->setTextColor(i&1?_fgcolor:altcolor);
+                    _tft->setTextColor(i&1?_altcolor:_fgcolor);
                 else
-                    _tft->setTextColor(i&1?altcolor:_fgcolor);
+                    _tft->setTextColor(i&1?_fgcolor:_altcolor);
                 strncpy(buffer, ptr, 4);
                 _tft->print(buffer);
                 ptr += 4;

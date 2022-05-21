@@ -4,7 +4,7 @@
 #include "displayobject.h"
 #include "status.h"
 
-#define DISPLAYSTRINGMAX    32+1
+#define DISPLAYSTRINGMAX    32+3
 
 class operation: public displayObject
 {

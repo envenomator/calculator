@@ -72,10 +72,10 @@ void setup(void) {
   tft.fillScreen(ST77XX_BLACK);
 
   // attach screen object and asign area to each output object
-  result.init(&tft, area(0,0,319,23), ST77XX_WHITE);
+  result.init(&tft, area(0,0,319,23), ST77XX_WHITE, 0x04FF);
   flags.init(&tft,area(0,30,319,46), ST77XX_YELLOW);
   op.init(&tft, area(0,75,319,99), ST77XX_BLUE);
-  input.init(&tft, area(0,100,319,129), ST77XX_BLUE);
+  input.init(&tft, area(0,100,319,129), ST77XX_BLUE, 0x04FF);
   currentstatus.init(&tft, area(0,224,319,239), ST77XX_GREEN);
 
   // set backlight pin to on

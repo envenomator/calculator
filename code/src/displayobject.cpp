@@ -6,11 +6,12 @@ displayObject::displayObject()
     _tft = NULL;
 }
 
-void displayObject::init(Adafruit_ST7789 *tft, area newarea, uint16_t fgcolor, uint16_t bgcolor)
+void displayObject::init(Adafruit_ST7789 *tft, area newarea, uint16_t fgcolor, uint16_t altcolor, uint16_t bgcolor)
 {
     _tft = tft;
     _tftarea = newarea;
     _fgcolor = fgcolor;
+    _altcolor = altcolor;
     _bgcolor = bgcolor;
 }
 
@@ -36,6 +37,11 @@ void displayObject::setbgColor(uint16_t color)
 void displayObject::setfgColor(uint16_t color)
 {
     _fgcolor = color;
+}
+
+void displayObject::setaltColor(uint16_t color)
+{
+    _altcolor = color;
 }
 
 void displayObject::show()
