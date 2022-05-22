@@ -1,6 +1,7 @@
 #include "displayvalue.h"
 #include <string.h>
 #include <inttypes.h>
+#include "FreeMono8pt7b.h"
 
 void displayValue::setValue(uint32_t value)
 {
@@ -188,7 +189,14 @@ void displayValue::_display()
     // setup start position and fontsizes
     _tft->setTextSize(_fontsize);
     _tft->setTextColor(_fgcolor,_bgcolor);
-    _tft->setCursor(_tftarea.getBottomRight().getx() - (strlen(_displaystring) * _fontwidth - 1),
+    if(_base == Bin && _fontsize == 1)
+    {
+        _tft->setFont(&FreeMono8pt7b);
+        _tft->setCursor(_tftarea.getBottomRight().getx() - (strlen(_displaystring) * 10 - 1),
+                    _tftarea.getTopLeft().gety()+15);
+    }
+    else
+        _tft->setCursor(_tftarea.getBottomRight().getx() - (strlen(_displaystring) * _fontwidth - 1),
                     _tftarea.getTopLeft().gety());
 
     // handle each base differently on display
@@ -227,6 +235,7 @@ void displayValue::_display()
                 _tft->print(buffer);
                 ptr += 4;
             }
+            _tft->setFont();
             break;
         case Hex:
             _tft->print(_displaystring);

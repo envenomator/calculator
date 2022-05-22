@@ -81,7 +81,7 @@ void setup(void) {
   op.init(&tft, area(0,75,319,99), ST77XX_BLUE);
   input.init(&tft, area(0,100,319,129), ST77XX_BLUE, TFT_DARKBLUE);
   currentstatus.init(&tft, area(0,224,319,239), ST77XX_GREEN);
-
+  
   // set backlight pin to on
   DDRB |= (1 << 6);
   PORTB |= (1 << 6); // set bit 6 on for backlight (BL)
@@ -109,10 +109,10 @@ void loop() {
         input.deleteDigit();
         break;
       case 'c': // Clear
-        result.setValue(0); // no results
         result.hide();
-        op.set(operation::Method::None);
+        result.setValue(0); // no results
         op.hide();
+        op.set(operation::Method::None);
         flags.hide();
         flags.clearFlags();
         input.setValue(0);
