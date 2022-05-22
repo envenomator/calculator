@@ -4,7 +4,7 @@
 #include "displayobject.h"
 #include "status.h"
 
-#define DISPLAYSTRINGMAX    32+3
+#define OPDISPLAYSTRINGMAX    32+3
 
 class operation: public displayObject
 {
@@ -44,7 +44,7 @@ class operation: public displayObject
         bool _carryflag;        // carry flag status at last operation
         bool _overflowflag;     // overflow flag at last operation
         Method _currentmethod;
-        char _displaystring[DISPLAYSTRINGMAX];    // representation of current value as a string
+        char _displaystring[OPDISPLAYSTRINGMAX];    // representation of current value as a string
         void _display();
         uint32_t maskToBitLength(uint32_t value, uint8_t bitlength);  // mask to specific bitlength
 };
