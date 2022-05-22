@@ -14,6 +14,7 @@
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
 #include <SPI.h>
+#include <TimerOne.h>        // used for automatic shutdown timer
 #include "displayvalue.h"
 #include "inputbox.h"
 #include "area.h"
@@ -30,6 +31,11 @@ Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
 // Custom colors
 #define TFT_LIGHTGREY 0x9cf3
 #define TFT_DARKBLUE  0x0015
+
+// Timer
+#define TIMER_US 100000                         // 100mS set timer duration in microseconds 
+#define TICK_COUNTS 600                         // 60S worth of timer ticks
+volatile long tick_count = TICK_COUNTS;         // Counter for 10S
 
 // Matrix keypad setup
 const byte ROWS = 7;
@@ -69,6 +75,16 @@ void sleepNow()
   detachInterrupt(0);
 }
 
+// --------------------------
+// timerIsr() 100 milli second interrupt ISR()
+// Called every time the hardware timer 1 times out.
+// --------------------------
+void timerIsr()
+{
+  // count down to zero, don't restart. Main loop will pick up on zero
+  if(tick_count) tick_count--;
+}
+
 void setup(void) {
   // Screen init
   tft.init(240, 320);           // Init ST7789 320x240
@@ -92,6 +108,11 @@ void setup(void) {
   // show default objects on screen
   input.show();
   currentstatus.show();
+
+  // Countdown timer start
+  Timer1.initialize(TIMER_US);                  // Initialise timer 1
+  Timer1.attachInterrupt( timerIsr );           // attach the ISR routine here
+
 }
 
 void loop() {
@@ -99,6 +120,8 @@ void loop() {
 
   if(key)
   {
+    tick_count = TICK_COUNTS; // reset timer
+
     switch(key)
     {
       case '0' ... '9':
@@ -261,7 +284,7 @@ void loop() {
     }
   }
 
-  if(digitalRead(2) == 0)
+  if(digitalRead(2) == 0 || tick_count == 0)
   {
     PORTB &= ~(1 << 6); // backlight off
     while(digitalRead(2) == 0);
@@ -269,5 +292,6 @@ void loop() {
     delay(50);  // debounce button
     while(digitalRead(2) == 0); // wait for button release
     PORTB |= (1 << 6);  // backlight back on again
+    tick_count = TICK_COUNTS; // reset timer
   }
 }
