@@ -32,13 +32,13 @@ void statusMessage::_display()
     switch(_base)
     {
         case status::Hex:
-            sprintf(message,"HEX ");
+            sprintf(message,"Base16 (HEX) ");
             break;
         case status::Bin:
-            sprintf(message,"BIN ");
+            sprintf(message,"Base2 (BIN) ");
             break;
         case status::Dec:
-            sprintf(message,"DEC ");
+            sprintf(message,"Base10 (DEC) ");
             break;
     }
     // bit length
@@ -55,8 +55,6 @@ void statusMessage::_display()
     {
         if(_sign)
             strcat(message, " signed");
-        else
-            strcat(message, " unsigned");
     }
 
     // Display message
