@@ -32,13 +32,13 @@ void statusMessage::_display()
     switch(_base)
     {
         case status::Hex:
-            sprintf(message,"Base16 HEX ");
+            sprintf(message,"Base16 ");
             break;
         case status::Bin:
-            sprintf(message,"Base2 BIN ");
+            sprintf(message,"Base2 ");
             break;
         case status::Dec:
-            sprintf(message,"Base10 DEC ");
+            sprintf(message,"Base10 ");
             break;
     }
     // bit length

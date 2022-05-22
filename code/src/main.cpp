@@ -48,11 +48,11 @@ byte colPins[COLS] = {14,15,16,17,18,19};
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
 // value setup
-displayValue result(0,status::Bin, 8, true);  // default Decimal mode, start from 0, nothing to show
-inputBox input(0,status::Bin,8, true);          // default Decimal mode, start from 0, show value
+displayValue result(0,status::Hex, 16, false);  // default Decimal mode, start from 0, nothing to show
+inputBox input(0,status::Hex,16, false);          // default Decimal mode, start from 0, show value
 
 // status box
-statusMessage currentstatus(0, status::Bin, 8, true);
+statusMessage currentstatus(0, status::Hex, 16, false);
 statusFlags flags;
 operation op;
 
@@ -150,15 +150,21 @@ void loop() {
         //result.hide();
         result.setBitLength(32);
         break;
-      case 's': // change to 2s complement
-        input.setSign(true);
-        result.setSign(true);
-        currentstatus.setSign(true);
+      case 's': // change to 2s complement in Dec mode
+        if(input.getBase() == status::Dec)
+        {
+          input.setSign(true);
+          result.setSign(true);
+          currentstatus.setSign(true);
+        }
         break;
       case 'u': // change to unsigned
-        input.setSign(false);
-        result.setSign(false);
-        currentstatus.setSign(false);
+        if(input.getBase() == status::Dec)
+        {
+          input.setSign(false);
+          result.setSign(false);
+          currentstatus.setSign(false);
+        }
         break;
       case '^': // change sign, if signed decimal
         if(input.getBase() == status::Dec && input.getSign())
