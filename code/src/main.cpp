@@ -27,6 +27,10 @@
 #define TFT_DC         7
 Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
 
+// Custom colors
+#define TFT_LIGHTGREY 0x9cf3
+#define TFT_DARKBLUE  0x0015
+
 // Matrix keypad setup
 const byte ROWS = 7;
 const byte COLS = 6;
@@ -44,11 +48,11 @@ byte colPins[COLS] = {14,15,16,17,18,19};
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
 // value setup
-displayValue result(0,status::Dec, 8, true);  // default Decimal mode, start from 0, nothing to show
-inputBox input(0,status::Dec,8, true);          // default Decimal mode, start from 0, show value
+displayValue result(0,status::Bin, 8, true);  // default Decimal mode, start from 0, nothing to show
+inputBox input(0,status::Bin,8, true);          // default Decimal mode, start from 0, show value
 
 // status box
-statusMessage currentstatus(0, status::Dec, 8, true);
+statusMessage currentstatus(0, status::Bin, 8, true);
 statusFlags flags;
 operation op;
 
@@ -72,10 +76,10 @@ void setup(void) {
   tft.fillScreen(ST77XX_BLACK);
 
   // attach screen object and asign area to each output object
-  result.init(&tft, area(0,0,319,23), ST77XX_WHITE, 0x04FF);
+  result.init(&tft, area(0,0,319,23), ST77XX_WHITE, TFT_LIGHTGREY);
   flags.init(&tft,area(0,30,319,46), ST77XX_YELLOW);
   op.init(&tft, area(0,75,319,99), ST77XX_BLUE);
-  input.init(&tft, area(0,100,319,129), ST77XX_BLUE, 0x04FF);
+  input.init(&tft, area(0,100,319,129), ST77XX_BLUE, TFT_DARKBLUE);
   currentstatus.init(&tft, area(0,224,319,239), ST77XX_GREEN);
 
   // set backlight pin to on
@@ -95,7 +99,6 @@ void loop() {
 
   if(key)
   {
-    
     switch(key)
     {
       case '0' ... '9':
@@ -161,20 +164,6 @@ void loop() {
         if(input.getBase() == status::Dec && input.getSign())
         {
             input.negateDisplay();
-            /*
-            switch(input.getBitLength())
-            {
-              case 8:
-                input.setValue(-(int8_t)(input.getValue()));
-                break;
-              case 16:
-                input.setValue(-(int16_t)(input.getValue()));
-                break;
-              case 32:
-                input.setValue(-(int32_t)(input.getValue()));
-                break;
-            }
-            */
         }
         break;
       case '!': // Bitwise NOT
@@ -191,7 +180,6 @@ void loop() {
         break;
       case '=':
         // clear old flags first
-        //currentstatus.clearFlags();
         if(!op.inProgress()) result.setValue(input.getValue());
         // always perform an operation at =, even 'None'
         result.setValue(op.perform(result.getValue(),input.getValue(),input.getBitLength(),input.getBase(),input.getSign()));

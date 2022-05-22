@@ -5,14 +5,18 @@
 #include "displayobject.h"
 
 #define DISPLAYSTRINGMAX    32+3 // for 0b / 0x etc, two chars extra
+
+#define BINHEADER   "0b"
+#define HEXHEADER   "0x"
+
 class displayValue: public displayObject, public status
 {
     public:
         displayValue(uint32_t value, status::Base base, uint8_t bitlength, bool sign): status (value, base, bitlength, sign)
         {
             if(_base == status::Dec) strcpy(_displaystring, "0");
-            if(_base == status::Hex) strcpy(_displaystring, "0x0");
-            if(_base == status::Bin) strcpy(_displaystring, "0b0");
+            if(_base == status::Hex) strcpy(_displaystring, HEXHEADER"0");
+            if(_base == status::Bin) strcpy(_displaystring, BINHEADER"0");
 
             _currentLength = 0;
             _setDigitLimits();

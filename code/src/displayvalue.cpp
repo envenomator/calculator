@@ -25,7 +25,7 @@ void displayValue::_valueToString()
     switch(_base)
     {
         case Bin:
-            strcpy(_displaystring, "0b");
+            strcpy(_displaystring, BINHEADER);
 
             // convert 32-bit integer to 32 character string with 0/1s
             v = _value;
@@ -50,7 +50,7 @@ void displayValue::_valueToString()
             break;
         case Hex:
             snprintf(temp, DISPLAYSTRINGMAX, "%" PRIX32 "", _value);
-            strcpy(_displaystring, "0x");
+            strcpy(_displaystring, HEXHEADER);
             strcat(_displaystring, temp);
             _currentLength = strlen(temp);
             if(_currentLength == 1 && temp[0] == '0') _currentLength = 0;
@@ -199,7 +199,7 @@ void displayValue::_display()
             break;
         case Bin:
             _clear();   // needed for color block changes on most entries
-            _tft->print("0b");
+            _tft->print(BINHEADER);
             if(_currentLength == 0) _tft->print("0");
 
             blocks = _currentLength >> 2;
